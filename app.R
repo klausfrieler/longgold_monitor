@@ -19,7 +19,7 @@ source("plot_util.R")
 on_server <- grepl("shiny-server", getwd())
 
 if(on_server){
-    result_dir <- "../dgm_demo/output/results"
+    result_dir <- "../de_wave_7_2021/output/results"
 } else{
     result_dir <- "data/from_server"
 }
