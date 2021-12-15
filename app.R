@@ -22,7 +22,10 @@ if(on_server){
     #result_dir <- "../de_wave_7_2021/output/results"
     result_dir <- readRDS("result_dir.rds")
 } else{
-    result_dir <- "data/from_server"
+    #result_dir <- "data/from_server"
+  filter_debug <- F
+  result_dir <- sprintf("data/it_wave/from_server/part%d", 1:2)
+  #result_dir <- "data/it_wave/from_server"
 }
 
 setup_workspace(result_dir)
@@ -197,9 +200,23 @@ ui_new <-
             ))
 
 # Define server logic required to draw a plot
+reread_data <- function(x){
+  setup_workspace(result_dir)
+}
+
+check_data_func <- map(1:length(result_dir), function(i){
+    reactiveFileReader(1000, NULL, result_dir[i], reread_data)
+  })
+
+check_data <- function(){
+  for(i in 1:length(check_data_func)){
+    do.call(check_data_func[[i]], list())
+  }  
+}
+
 server <- function(input, output, session) {
   message("*** STARTING APP***")
-  check_data <- reactiveFileReader(1000, session, result_dir, setup_workspace)
+  #check_data <- reactiveFileReader(1000, session, result_dir[1], reread_data, result_dir[1])
   shiny::observeEvent(input$switch_axes, {
     x <- input$bv_variable1
     y <- input$bv_variable2
@@ -291,9 +308,9 @@ server <- function(input, output, session) {
       return()
     }
     lm_tab <- lm(scale(MDT.ability) ~ 
-                   scale(DEG.age) + 
-                   scale(RAT.ability) + 
-                   scale(GMS.general), 
+                   scale(DEG.age),# + 
+                   #scale(RAT.ability) + 
+                   #scale(GMS.general), 
                  data = master ) %>% 
       sjPlot::tab_model()
     shiny::div(shiny::h4("Main Model"), shiny::HTML(lm_tab$knitr))
