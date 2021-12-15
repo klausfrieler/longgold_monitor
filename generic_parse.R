@@ -46,6 +46,17 @@ filter_for_test <- function(results, test_id){
 dummy <- append(map(adaptive_tests, make_adaptive_test_dummy), map(psyquest::get_tests(), make_quest_dummy))
 names(dummy) <- c(adaptive_tests, psyquest::get_tests())
 
+make_yes_no_factor <- function(x){
+  factor(x, levels = 1:2, labels = c("Yes", "No"))
+}
+
+make_yes_no_factor_in_entry <- function(entry, label){
+  if(label %in% names(entry)){
+    entry[[label]] <- make_yes_no_factor(entry[[label]])
+  }
+  entry
+}
+
 post_process <- function(entry, test_id){
   if(test_id == "DEG"){
     if("DEG.handedness" %in% names(entry)){
@@ -55,12 +66,19 @@ post_process <- function(entry, test_id){
     if("DEG.age" %in% names(entry)){
       entry$DEG.age <- entry$DEG.age/12
     }
+    entry <- make_yes_no_factor_in_entry(entry, "DEG.best_shot")
+    entry <- make_yes_no_factor_in_entry(entry, "DEG.hearing_impairment")
+    
     if("DEG.gender" %in% names(entry)){
       entry$DEG.gender = factor(entry$DEG.gender, 
                                 levels = 1:4, 
                                 labels = c("female", "male", "other", "rather not say")) 
     }
   }  
+  if(test_id == "GMS"){
+    #browser()
+    entry <- make_yes_no_factor_in_entry(entry, "GMS.absolute_pitch")
+  }
   entry
 }
 
@@ -91,7 +109,7 @@ parse_generic_entry <- function(q_entry, label){
 
 parse_battery_results <- function(data){
   map_dfr(data %>% as.list(), function(x){
-    browser()
+    #browser()
     if(!("participant_id" %in% names(x))){
       return(NULL)
     }
