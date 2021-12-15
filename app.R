@@ -20,7 +20,7 @@ on_server <- grepl("shiny-server", getwd())
 
 if(on_server){
     #result_dir <- "../de_wave_7_2021/output/results"
-    results_dir <- readRDS("result_dir.rds")
+    result_dir <- readRDS("result_dir.rds")
 } else{
     result_dir <- "data/from_server"
 }
