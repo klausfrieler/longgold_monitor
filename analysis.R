@@ -53,7 +53,7 @@ join_rows <- function(data){
 }
 
 read_data <- function(result_dir = "data/from_server"){
-  messagef("Setting up data from %s", result_dir)
+  messagef("Setting up data from [%s]", paste(result_dir, collapse = ", "))
   
   results <- purrr::map(list.files(result_dir, pattern = "*.rds", full.names = T), ~{readRDS(.x) %>% as.list()})
   #browser()
