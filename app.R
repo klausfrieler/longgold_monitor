@@ -44,15 +44,15 @@ var_data <- tibble(variable = var_choices, type = var_types)
 theme_set(get_default_theme())
 
 get_intro_text <- function(){
-  div(h3("Welcome to the DGM DOTS DEMO  Analysis App"), 
-         p("This app allows you visualize and inspect the data from a DGM DOTS DEMO study"),
+  div(h3("Welcome to the LongGold  Battery Monitor App"), 
+         p("This app allows you visualize and inspect the data from de_wave_7_2021"),
       p("Have fun!"),
       style = "width:50%;text-align:justify")
 }
 
 impressum <- function(){
     p(
-        "DGM DOTS DEMO  Monitor  v0.1", 
+        "LongGold  Battery  Monitor  v0.1", 
         shiny::tags$br(), 
         shiny::tags$br(), 
         "Author: Klaus Frieler", 
@@ -80,7 +80,7 @@ input_width <- 300
 ui_new <-   
     shiny::shinyUI(
         navbarPage(
-            title = "DGM DOTS DEMO Memory", 
+            title = "LongGold Battery Monitor", 
             theme = shinytheme("spacelab"),
             id = "tabs",
             tabPanel(
@@ -309,7 +309,7 @@ server <- function(input, output, session) {
     shiny::div(shiny::h4("Causal Network Model Regression"), shiny::HTML(lm_tab$knitr))
    })
   output$download_all_data_csv <- downloadHandler(
-    filename = "dgm_demo_data.csv",
+    filename = "de_wave_7_2021_data.csv",
     content = function(file) {
       dec <- ifelse(input$dec, ",", ".") 
       write.table(master, file, row.names = FALSE, dec = dec, sep = ";", quote = T)
