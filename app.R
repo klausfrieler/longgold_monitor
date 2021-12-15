@@ -50,7 +50,9 @@ theme_set(get_default_theme())
 
 get_intro_text <- function(){
   div(h3("Welcome to the LongGold Battery Monitor App"), 
-         p("This app allows you visualize and inspect the data from de_wave_7_2021"),
+         p("This app allows you visualize and inspect the data from", shiny::tags$br(), 
+           shiny::tags$b(sprintf("[%s]", str_replace_all(
+           paste(result_dir, collapse = ", "), "output/results", "")))),
       p("Have fun!"),
       style = "width:50%;text-align:justify")
 }
