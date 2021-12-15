@@ -262,18 +262,18 @@ server <- function(input, output, session) {
       bivariate_plot_auto(master, input, var_data, remove_na = T)   
       })
    
-    output$pc_plot <- renderForceNetwork({
-      check_data()
-      if(length(input$pc_variable) < 2){
-        return()
-      }
-      get_pc_graph(master %>% select(input$pc_variable), 
-                   alpha = as.numeric(input$alpha),
-                   charge = as.numeric(input$charge),
-                   linkDistance = as.numeric(input$link_distance),
-                   fontSize = as.numeric(input$font_size),
-                   opacityNoHover = as.numeric(input$opacity))
-   })
+   #  output$pc_plot <- renderForceNetwork({
+   #    check_data()
+   #    if(length(input$pc_variable) < 2){
+   #      return()
+   #    }
+   #    get_pc_graph(master %>% select(input$pc_variable), 
+   #                 alpha = as.numeric(input$alpha),
+   #                 charge = as.numeric(input$charge),
+   #                 linkDistance = as.numeric(input$link_distance),
+   #                 fontSize = as.numeric(input$font_size),
+   #                 opacityNoHover = as.numeric(input$opacity))
+   # })
    
   output$corr_tab <- renderTable({
     check_data()
