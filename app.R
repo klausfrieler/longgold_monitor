@@ -47,12 +47,18 @@ var_data <- tibble(variable = var_choices, type = var_types)
 
 
 theme_set(get_default_theme())
-
+format_result_dir <- function(fname = result_dir){
+  fname %>%
+    paste(collapse = ", ") %>% 
+    str_replace_all("output/results", "") %>% 
+    str_replace_all("[.]+", "") %>% 
+    str_replace_all("^[/]+", "")%>% 
+    str_replace_all("[/]+$", "") 
+}
 get_intro_text <- function(){
   div(h3("Welcome to the LongGold Battery Monitor App"), 
          p("This app allows you visualize and inspect the data from", shiny::tags$br(), 
-           shiny::tags$b(sprintf("[%s]", str_replace_all(
-           paste(result_dir, collapse = ", "), "output/results", "")))),
+           shiny::tags$b(sprintf("[%s]", format_result_dir(result_dir)))),
       p("Have fun!"),
       style = "width:50%;text-align:justify")
 }
