@@ -66,7 +66,8 @@ read_data <- function(result_dir = "data/from_server"){
 setup_workspace <- function(results = "data/from_server"){
   master <- read_data(results) 
   master <- master %>% select(-ends_with("num_items"))
-  master <- master %>% filter(!is_debug_id(p_id))
+  messagef("Filter for debug ids is '%s'", filter_debug)
+  if(filter_debug)master <- master %>% filter(!is_debug_id(p_id))
   assign("master", master, globalenv())
 }
 
