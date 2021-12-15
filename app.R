@@ -20,7 +20,8 @@ on_server <- grepl("shiny-server", getwd())
 
 if(on_server){
     #result_dir <- "../de_wave_7_2021/output/results"
-    result_dir <- readRDS("result_dir.rds")
+  filter_debug <- F
+  result_dir <- readRDS("result_dir.rds")
 } else{
     #result_dir <- "data/from_server"
   filter_debug <- F
@@ -28,7 +29,7 @@ if(on_server){
   #result_dir <- "data/it_wave/from_server"
 }
 
-setup_workspace(result_dir)
+setup_workspace(result_dir, filter_debug)
 
 var_choices <- setdiff(names(master), c("p_id",
                                        "time_started", 

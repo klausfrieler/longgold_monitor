@@ -63,7 +63,7 @@ read_data <- function(result_dir = "data/from_server"){
 }
 
 
-setup_workspace <- function(results = "data/from_server"){
+setup_workspace <- function(results = "data/from_server", filter_debug = T){
   master <- read_data(results) 
   master <- master %>% select(-ends_with("num_items"))
   messagef("Filter for debug ids is '%s'", filter_debug)
