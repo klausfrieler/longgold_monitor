@@ -19,7 +19,8 @@ source("plot_util.R")
 on_server <- grepl("shiny-server", getwd())
 
 if(on_server){
-    result_dir <- "../de_wave_7_2021/output/results"
+    #result_dir <- "../de_wave_7_2021/output/results"
+    results_dir <- readRDS("result_dir.rds")
 } else{
     result_dir <- "data/from_server"
 }
@@ -44,7 +45,7 @@ var_data <- tibble(variable = var_choices, type = var_types)
 theme_set(get_default_theme())
 
 get_intro_text <- function(){
-  div(h3("Welcome to the LongGold  Battery Monitor App"), 
+  div(h3("Welcome to the LongGold Battery Monitor App"), 
          p("This app allows you visualize and inspect the data from de_wave_7_2021"),
       p("Have fun!"),
       style = "width:50%;text-align:justify")
@@ -68,7 +69,7 @@ impressum <- function(){
                  "Deutsche Gesellschaft für Musikspsychologie", target = "_blank"),
         shiny::tags$br(), 
         shiny::tags$br(),
-        shiny::a(href = "https://github.com/klausfrieler/dmg_monitor", "On Github", target = "_blank"), 
+        shiny::a(href = "https://github.com/klausfrieler/longgold_monitor", "On Github", target = "_blank"), 
         style = "font-size: 10pt; display: block"
     )
     
