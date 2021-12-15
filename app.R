@@ -104,8 +104,7 @@ ui_new <-
                     mainPanel(
                         htmlOutput("introduction"),
                         h4("Summary"),
-                        tableOutput("overall_stats"),
-                        htmlOutput("model_tab")
+                        tableOutput("overall_stats")
                     )
                     
                 )
