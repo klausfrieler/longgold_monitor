@@ -33,13 +33,14 @@ setup_workspace(result_dir, filter_debug)
 
 var_choices <- setdiff(names(master), c("p_id",
                                        "time_started", 
-                                       "time_ended", 
+                                       "time_last_modified", 
                                        "pilot", 
                                        "complete", 
                                        "num_restarts", 
                                        "DEG.first_language",
                                        "DEG.second_language",
-                                       "DEG.gender", "DEG.age", 
+                                       "DEG.gender", 
+                                       "DEG.age", 
                                        "RAT.num_items"))
 var_types <- c("categorial", "numeric")[1 + map_lgl(var_choices, ~{(master[[.x]] %>% class())[1] == "numeric"})]
 var_data <- tibble(variable = var_choices, type = var_types)
@@ -209,7 +210,7 @@ ui_new <-
 
 # Define server logic required to draw a plot
 reread_data <- function(x){
-  setup_workspace(result_dir)
+  setup_workspace(result_dir, filter_debug)
 }
 
 check_data_func <- map(1:length(result_dir), function(i){
