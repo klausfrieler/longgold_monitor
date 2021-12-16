@@ -21,11 +21,13 @@ on_server <- grepl("shiny-server", getwd())
 if(on_server){
     #result_dir <- "../de_wave_7_2021/output/results"
   filter_debug <- F
-  result_dir <- readRDS("result_dir.rds")
+  result_dir  <- readRDS("result_dir.rds")
+  session_dir <- str_replace(result_dir, "results", "sessions")
 } else{
     #result_dir <- "data/from_server"
   filter_debug <- F
   result_dir <- sprintf("data/it_wave/from_server/part%d", 1:2)
+  session_dir <- "../../test_batteries/output/sessions/"
   #result_dir <- "data/it_wave/from_server"
 }
 
@@ -167,45 +169,23 @@ ui_new <-
                     )
                     
                 )
+            ),
+            tabPanel(
+              "Sessions",
+              sidebarLayout(
+                sidebarPanel(
+                  impressum(),
+                  width = 2
+                ),
+                
+                # Main panel for displaying outputs ----
+                mainPanel(
+                  DT::DTOutput("session_data")
+                )
+                
+              )
             )
-            # ,
-            # tabPanel(
-            #     "Causal Network",
-            #     sidebarLayout(
-            #         sidebarPanel(
-            #             # Input: Select information ----
-            #             selectizeInput("pc_variable", "Variables:", num_predictors, selected = c("RAT.ability", "GMS.general", "ARTS.points"),
-            #                            multiple = T), 
-            #             selectInput(inputId = "alpha", 
-            #                         label = "Alpha Level",
-            #                         choices = c(.05, .01, .001), selected = ".05",
-            #                         multiple = F, selectize = F),
-            #             selectInput(inputId = "charge", 
-            #                         label = "Node Charge",
-            #                         choices = seq(1, 5)*(-30), selected = "-60",
-            #                         multiple = F, selectize = F),
-            #             selectInput(inputId = "link_distance", 
-            #                         label = "Link Distance",
-            #                         choices = seq(1, 5)*20 + 20, selected = "100",
-            #                         multiple = F, selectize = F),
-            #             selectInput(inputId = "font_size", 
-            #                         label = "Font Size",
-            #                         choices = seq(1, 10)*2 + 12, selected = "16",
-            #                         multiple = F, selectize = F),
-            #             selectInput(inputId = "opacity", 
-            #                         label = "Opacity",
-            #                         choices = seq(0, 1, .1), selected = "0.8",
-            #                         multiple = F, selectize = F),
-            #             impressum(),
-            #             width = 2
-            #         ),
-            #         
-            #         # Main panel for displaying outputs ----
-            #         mainPanel(
-            #             forceNetworkOutput("pc_plot", width = "800px"),
-            #             htmlOutput("num_model_tab")
-            #             )
-            #     ))
+            
             ))
 
 # Define server logic required to draw a plot
@@ -262,7 +242,13 @@ server <- function(input, output, session) {
         mutate_if(is.numeric, round, 2) %>% 
         select(time_started, time_last_modified, DEG.first_language, finished, DEG.age, DEG.gender, everything())
       }, options = list(lengthMenu = list(c(25, 50,  -1), c("25", "50",  "All"))))
-   
+    
+    output$session_data <- renderDataTable({
+      session_data <- read_sessions(session_dir)
+      
+    }, options = list(lengthMenu = list(c(25, 50,  -1), c("25", "50",  "All"))))
+    
+    
     output$univariate_plot <- renderPlot({
       check_data()
       var_info <- var_data %>% filter(variable == input$uv_variable)

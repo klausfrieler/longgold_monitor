@@ -62,6 +62,30 @@ read_data <- function(result_dir = "data/from_server"){
     })
 }
 
+format_difftime <- function(dtime, places = 0){
+  hms::as_hms(round(dtime, places)) %>% as.character()
+}
+
+read_sessions <- function(session_dir = "../../test_batteries/output/sessions/"){
+  dirs <- list.files(session_dir)
+  map_dfr(dirs, function(x){
+    data_f <- readRDS(file.path(file.path(session_dir, x), "data.RDS"))
+    time_stamp <- readRDS(file.path(file.path(session_dir, x), "timestamp.RDS"))
+    #browser()
+    tibble(p_id = data_f$passive$p_id,
+           session_name = x, 
+           is_debug = is_debug_id(data_f$passive$p_id),
+           time_started = data_f$passive$time_started,
+           time_last_modified = time_stamp,
+           test_run_time = format_difftime(time_last_modified - time_started, 0),
+           closed = data_f$passive$closed,
+           num_restarts = data_f$passive$num_restarts,
+           language = data_f$passive$language,
+           num_tests = data_f$passive$results %>% as.list() %>% length(),
+           tests_finished = paste( data_f$passive$results %>% names(), collapse = ";"))
+  }) %>% mutate(current_time = lubridate::now()) %>% arrange(desc(time_started))
+  
+} 
 
 setup_workspace <- function(results = "data/from_server", filter_debug = T){
   master <- read_data(results) 
