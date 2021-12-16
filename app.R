@@ -154,7 +154,6 @@ ui_new <-
                     
                 )
             ),            
-            
             tabPanel(
                 "Data",
                 sidebarLayout(
@@ -185,12 +184,10 @@ ui_new <-
                   impressum(),
                   width = 2
                 ),
-                
                 # Main panel for displaying outputs ----
                 mainPanel(
                   DT::DTOutput("session_data")
                 )
-                
               )
             )
             

@@ -110,7 +110,7 @@ read_sessions <- function(session_dir = "../../test_batteries/output/sessions/")
            is_longgold_id = (nchar(p_id) %in% c(10, 11, 14, 15)) | substr(p_id, 2, 7) == "000000",
            time_started = data_f$passive$time_started,
            time_last_modified = time_stamp,
-           test_run_time = format_difftime(time_last_modified - time_started, 0),
+           test_run_time = format_difftime(time_last_modified - time_started, 2),
            #closed = data_f$passive$closed,
            num_restarts = data_f$passive$num_restarts,
            language = data_f$passive$language,
