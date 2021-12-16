@@ -62,7 +62,7 @@ read_data <- function(result_dir = "data/from_server"){
     })
 }
 
-format_difftime <- function(dtime, places = 0){
+format_difftime <- function(dtime, places = 2){
   hms::as_hms(round(dtime, places)) %>% as.character()
 }
 

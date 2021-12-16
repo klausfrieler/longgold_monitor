@@ -178,7 +178,7 @@ ui_new <-
                                                                      "LongGold IDs without Debug IDs", 
                                                                      "LongGold IDs", 
                                                                      "Other IDs"), multiple = F), 
-                  selectizeInput("complete_filter", "Completion Status", c("All", 
+                  selectizeInput("complete_filter", "State Filter", c("All", 
                                                                      "Finished", 
                                                                      "Unfinished"), multiple = F), 
                   
