@@ -107,7 +107,7 @@ read_sessions <- function(session_dir = "../../test_batteries/output/sessions/")
     tibble(p_id = data_f$passive$p_id,
            session_name = x, 
            is_debug_id = is_debug_id(data_f$passive$p_id),
-           is_longgold_id = nchar(data_f$passive$p_id) == 14 | nchar(data_f$passive$p_id) == 15,
+           is_longgold_id = substr(p_id, 2, 7) == "000000",
            time_started = data_f$passive$time_started,
            time_last_modified = time_stamp,
            test_run_time = format_difftime(time_last_modified - time_started, 0),
