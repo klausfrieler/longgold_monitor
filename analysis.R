@@ -66,6 +66,38 @@ format_difftime <- function(dtime, places = 0){
   hms::as_hms(round(dtime, places)) %>% as.character()
 }
 
+apply_session_filter <- function(data, id_filter, complete_filter){
+  data <- data %>% apply_id_filter(id_filter) 
+  data <- data %>% apply_complete_filter(complete_filter)
+  data
+}
+
+apply_complete_filter <- function(data, complete_filter){
+  if(complete_filter == "All"){
+    return(data)
+  }
+  if(complete_filter == "Finished"){
+    return(data %>% filter(is_finished))
+  }
+  if(complete_filter == "Unfinished"){
+    return(data %>% filter(!is_finished))
+  }
+  data
+}  
+apply_id_filter <- function(data, id_filter, complete_filter){
+  #browser()
+  if(id_filter == "All IDs"){
+    return(data)
+  }
+  
+  if(id_filter == "Longgold IDs without Debug IDs"){
+    return(data %>% filter(is_longgold_id & !is_debug_id))
+  }
+  if(id_filter == "Longgold IDs"){
+    return(data %>% filter(is_longgold_id))
+  }
+  data %>% filter(!is_longgold_id)
+}
 read_sessions <- function(session_dir = "../../test_batteries/output/sessions/"){
   dirs <- list.files(session_dir)
   map_dfr(dirs, function(x){
@@ -74,11 +106,12 @@ read_sessions <- function(session_dir = "../../test_batteries/output/sessions/")
     #browser()
     tibble(p_id = data_f$passive$p_id,
            session_name = x, 
-           is_debug = is_debug_id(data_f$passive$p_id),
+           is_debug_id = is_debug_id(data_f$passive$p_id),
+           is_longgold_id = nchar(data_f$passive$p_id) == 14 | nchar(data_f$passive$p_id) == 15,
            time_started = data_f$passive$time_started,
            time_last_modified = time_stamp,
            test_run_time = format_difftime(time_last_modified - time_started, 0),
-           closed = data_f$passive$closed,
+           #closed = data_f$passive$closed,
            num_restarts = data_f$passive$num_restarts,
            language = data_f$passive$language,
            num_tests = data_f$passive$results %>% as.list() %>% length(),

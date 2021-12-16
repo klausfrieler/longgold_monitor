@@ -174,6 +174,14 @@ ui_new <-
               "Sessions",
               sidebarLayout(
                 sidebarPanel(
+                  selectizeInput("id_filter", "ID Filter", c("All IDs", 
+                                                                     "Longgold IDs without Debug IDs", 
+                                                                     "Longgold IDs", 
+                                                                     "Other IDs"), multiple = F), 
+                  selectizeInput("complete_filter", "Completion Status", c("All", 
+                                                                     "Finished", 
+                                                                     "Unfinished"), multiple = F), 
+                  
                   impressum(),
                   width = 2
                 ),
@@ -244,8 +252,15 @@ server <- function(input, output, session) {
       }, options = list(lengthMenu = list(c(25, 50,  -1), c("25", "50",  "All"))))
     
     output$session_data <- renderDataTable({
-      session_data <- read_sessions(session_dir)
-      
+      check_data()
+      finished_ids <- master %>% filter(finished) %>% pull(p_id)
+      unfinished_ids <- master %>% filter(!finished) %>% pull(p_id)
+      session_data <- read_sessions(session_dir) %>%  
+        mutate(is_finished = p_id %in% finished_ids) %>%
+        select(-session_name) %>% 
+        select(p_id, is_longgold_id, is_debug_id, is_finished, everything())
+      #browser()
+      apply_session_filter(session_data, input$id_filter, input$complete_filter)
     }, options = list(lengthMenu = list(c(25, 50,  -1), c("25", "50",  "All"))))
     
     
