@@ -175,8 +175,8 @@ ui_new <-
               sidebarLayout(
                 sidebarPanel(
                   selectizeInput("id_filter", "ID Filter", c("All IDs", 
-                                                                     "Longgold IDs without Debug IDs", 
-                                                                     "Longgold IDs", 
+                                                                     "LongGold IDs without Debug IDs", 
+                                                                     "LongGold IDs", 
                                                                      "Other IDs"), multiple = F), 
                   selectizeInput("complete_filter", "Completion Status", c("All", 
                                                                      "Finished", 

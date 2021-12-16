@@ -90,10 +90,10 @@ apply_id_filter <- function(data, id_filter, complete_filter){
     return(data)
   }
   
-  if(id_filter == "Longgold IDs without Debug IDs"){
+  if(id_filter == "LongGold IDs without Debug IDs"){
     return(data %>% filter(is_longgold_id & !is_debug_id))
   }
-  if(id_filter == "Longgold IDs"){
+  if(id_filter == "LongGold IDs"){
     return(data %>% filter(is_longgold_id))
   }
   data %>% filter(!is_longgold_id)
