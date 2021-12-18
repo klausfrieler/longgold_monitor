@@ -150,11 +150,12 @@ apply_id_filter <- function(data, id_filter, complete_filter){
   data %>% filter(!is_longgold_id)
 }
 read_sessions <- function(session_dir = "../../test_batteries/output/sessions/"){
-  dirs <- list.files(session_dir)
+  dirs <- map(session_dir, ~{list.files(.x, full.names = T)}) %>% unlist() %>% unique()
+  #browser()
   map_dfr(dirs, function(x){
-    data_f <- readRDS(file.path(file.path(session_dir, x), "data.RDS"))
-    time_stamp <- readRDS(file.path(file.path(session_dir, x), "timestamp.RDS"))
     #browser()
+    data_f <- readRDS(file.path(x, "data.RDS"))
+    time_stamp <- readRDS(file.path(x, "timestamp.RDS"))
     tibble(p_id = data_f$passive$p_id,
            session_name = x, 
            is_debug_id = is_debug_id(data_f$passive$p_id),
