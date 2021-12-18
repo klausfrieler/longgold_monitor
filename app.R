@@ -20,12 +20,12 @@ on_server <- grepl("shiny-server", getwd())
 
 if(on_server){
     #result_dir <- "../de_wave_7_2021/output/results"
-  filter_debug <- F
+  filter_debug <- T
   result_dir  <- readRDS("result_dir.rds")
   session_dir <- str_replace(result_dir, "results", "sessions")
 } else{
     #result_dir <- "data/from_server"
-  filter_debug <- F
+  filter_debug <- T
   result_dir <- sprintf("data/it_wave/from_server/part%d", 1:2)
   session_dir <- "../../test_batteries/output/sessions/"
   #result_dir <- "data/it_wave/from_server"

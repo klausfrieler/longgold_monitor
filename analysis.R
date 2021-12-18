@@ -31,24 +31,75 @@ split_multi_entry <- function(entry){
   ret
 }
 
-join_rows <- function(data){
+unify_data_vec <- function(x){
+  #browser()
+  ret <- unique(x[!is.na(x)])  
+  if(length(ret) == 0){
+    ret <- NA
+  }
+  if(length(ret) > 1){
+    messagef("Found confliciting data in row: [%s]", paste(ret, collapse = ", "))
+    ret <- ret[1]
+  }
+  ret
+}
+
+join_two_part_data_rows <- function(rows){
+  if(nrow(rows) < 2){
+    return(rows)
+  }
+  if(nrow(rows) > 2){
+    return(rows %>% join_restart_rows() %>% join_two_part_data())
+  }
+  if(n_distinct(rows$p_id) != 1){
+    messagef("Row wiht more than one ID given: [%s]", paste(rows$p_id, collapse = ", "))
+    rows <- rows[rows$p_id == rows$p_id[1],]
+  }
+  #messagef("Joining rows for %s", rows$p_id[1])
+  test_vars <- names(rows)[names(rows) %>% str_detect("[.]")]
+  base_data <- 
+  tibble(p_id = rows$p_id[1], 
+         finished = rows$finished[1] & rows$finished[2], 
+         time_started = min(rows$time_started),
+         time_last_modified = min(rows$time_last_modified),
+         num_tests = sum(rows$num_tests)
+  ) 
+  #browser()
+  base_data %>% bind_cols(
+    rows %>% select(all_of(test_vars)) %>% mutate_all(unify_data_vec)
+  ) 
+}
+
+join_two_part_data <- function(data){
+  #browser()
+  ids <- data %>% count(p_id) %>% filter(n > 1) %>% pull(p_id)
+  ret <- data %>% filter(!(p_id %in% ids))
+  map_dfr(ids, function(i){
+    data %>% filter(p_id == i) %>% join_two_part_data_rows()
+  }) %>% 
+    bind_rows(ret)
+  
+}
+
+join_restart_rows <- function(data){
   if(is.null(data[["p_id"]])){
     return(data)
   }
+  #browser()
   ids <- data %>% count(p_id) %>% filter(n > 1) %>% pull(p_id)
   ret <- data %>% filter(!(p_id %in% ids))
   fixed_rows <- 
     map_dfr(ids, function(i){
-    tmp <- data %>% filter(p_id == i)
-    completed <- which(tmp$complete == TRUE)
-    if(length(completed) == 0){
-      tmp  <- tmp[nrow(tmp),]   
-    }
-    else{
-      tmp <- tmp[max(completed), ]  
-    }
-    tmp
-  })
+      tmp <- data %>% filter(p_id == i)
+      finished <- which(tmp$finished == TRUE)
+      if(length(finished) == 0){
+        tmp  <- tmp[nrow(tmp),]   
+      }
+      else{
+        tmp <- tmp[max(finished), ]  
+      }
+      tmp
+    })
   ret %>% bind_rows(fixed_rows) 
 }
 
@@ -122,9 +173,10 @@ read_sessions <- function(session_dir = "../../test_batteries/output/sessions/")
 
 setup_workspace <- function(results = "data/from_server", filter_debug = T){
   master <- read_data(results) 
+  if(filter_debug)master <- master %>% filter(!is_debug_id(p_id))
+  master <- master %>% join_two_part_data()
   master <- master %>% select(-ends_with("num_items"))
   messagef("Filter for debug ids is '%s'", filter_debug)
-  if(filter_debug)master <- master %>% filter(!is_debug_id(p_id))
   assign("master", master, globalenv())
 }
 
