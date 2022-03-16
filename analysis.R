@@ -103,6 +103,19 @@ join_restart_rows <- function(data){
   ret %>% bind_rows(fixed_rows) 
 }
 
+read_adaptive_raw_data <- function(result_dir = "data/from_server", test_ids){
+  if(missing(test_ids)){
+    stop("[read_adaptive_raw_data] At least one test id must be provided for ")
+  }
+  messagef("Setting up adaptive raw data from [%s]", paste(result_dir, collapse = ", "))
+  
+  results <- purrr::map(list.files(result_dir, pattern = "*.rds", full.names = T), ~{readRDS(.x) %>% as.list()})
+  #browser()
+  purrr::map_dfr(results, function(x){
+    parse_single_participant_results(x, raw_data = T, test_ids = test_ids)
+  })
+}
+
 read_data <- function(result_dir = "data/from_server"){
   messagef("Setting up data from [%s]", paste(result_dir, collapse = ", "))
   
@@ -110,7 +123,7 @@ read_data <- function(result_dir = "data/from_server"){
   #browser()
   purrr::map_dfr(results, function(x){
     parse_single_participant_results(x)
-    })
+  })
 }
 
 format_difftime <- function(dtime, places = 2){
@@ -135,6 +148,7 @@ apply_complete_filter <- function(data, complete_filter){
   }
   data
 }  
+
 apply_id_filter <- function(data, id_filter, complete_filter){
   #browser()
   if(id_filter == "All IDs"){
@@ -149,6 +163,7 @@ apply_id_filter <- function(data, id_filter, complete_filter){
   }
   data %>% filter(!is_longgold_id)
 }
+
 read_sessions <- function(session_dir = "../../test_batteries/output/sessions/"){
   dirs <- map(session_dir, ~{list.files(.x, full.names = T)}) %>% unlist() %>% unique()
   #browser()

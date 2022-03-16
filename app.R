@@ -104,8 +104,9 @@ ui_new <-
                 sidebarLayout(
                     sidebarPanel(
                         impressum(),
-                        downloadButton("download_all_data_csv", "Download data"),
+                        downloadButton("download_all_data_csv", "Download Data"),
                         checkboxInput("dec", label = "Use German Format", value = 0),
+                        downloadButton("download_HPT", "Download HPT Data"),
                         width = 2
                     ),
                     
@@ -338,6 +339,14 @@ server <- function(input, output, session) {
     content = function(file) {
       dec <- ifelse(input$dec, ",", ".") 
       write.table(master, file, row.names = FALSE, dec = dec, sep = ";", quote = T)
+    }
+  )
+  output$download_HPT <- downloadHandler(
+    filename = "de_wave_7_2021_HPT_data.rds",
+    content = function(file) {
+      raw_data <- read_adaptive_raw_data(result_dir, "HPT")
+      messagef("Read %d rows of HPT data", nrow(raw_data))
+      saveRDS(file = file, object = raw_data)
     }
   )
   

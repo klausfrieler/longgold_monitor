@@ -82,12 +82,17 @@ post_process <- function(entry, test_id){
   entry
 }
 
-parse_generic_entry <- function(q_entry, label){
+parse_generic_entry <- function(q_entry, label, raw_data = FALSE){
   if(label %in% c("session", "results")){
     return(NULL)
   }
   #messagef("Parsing entry of length %d for label '%s'", length(q_entry), label)
   dummy_entry <- dummy[[label]]
+  if(raw_data && label %in% adaptive_tests){
+    results <- attr(q_entry$ability, "metadata")$results
+    names(results) <- sprintf("%s.%s", label, names(results))
+    return(results)
+  }
   #browser()
   if(is.null(dummy_entry)){
     browser()
@@ -128,7 +133,7 @@ parse_battery_results <- function(data){
   })  
 }
 
-parse_single_participant_results <- function(data){
+parse_single_participant_results <- function(data, raw_data = F, test_ids = NULL){
   #browser()
   
   if(!("session" %in% names(data))){
@@ -139,5 +144,14 @@ parse_single_participant_results <- function(data){
                  time_started = data$session$time_started, 
                  time_last_modified = data$session$current_time, 
                  num_tests = length(setdiff(names(data), "session")))
-  meta %>% bind_cols(map_dfc(setdiff(names(data), "session"), ~{parse_generic_entry(data[[.x]], .x)})) 
+  if(raw_data){
+    meta <- meta %>% select(-num_tests)
+  }
+  meta %>% 
+    bind_cols(
+      map_dfc(setdiff(names(data), "session"), ~{
+        if(is.null(test_ids) || .x %in% test_ids){
+          parse_generic_entry(data[[.x]], .x, raw_data = raw_data)
+        }
+      })) 
 }
