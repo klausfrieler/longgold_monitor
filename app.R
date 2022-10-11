@@ -44,6 +44,8 @@ var_choices <- setdiff(names(master), c("p_id",
                                        "DEG.gender", 
                                        "DEG.age", 
                                        "RAT.num_items"))
+school_choices <- c("--", unique(master$school) %>% na.omit())
+
 var_types <- c("categorial", "numeric")[1 + map_lgl(var_choices, ~{(master[[.x]] %>% class())[1] == "numeric"})]
 var_data <- tibble(variable = var_choices, type = var_types)
 
@@ -104,6 +106,7 @@ ui_new <-
                 sidebarLayout(
                     sidebarPanel(
                         impressum(),
+                        selectizeInput("ov_filter_school", "School:", school_choices, multiple = F), 
                         downloadButton("download_all_data_csv", "Download Data"),
                         checkboxInput("dec", label = "Use German Format", value = 0),
                         downloadButton("download_HPT", "Download HPT Data"),
@@ -124,6 +127,7 @@ ui_new <-
                 sidebarLayout(
                     sidebarPanel(
                         selectizeInput("uv_variable", "Variable:", var_choices, multiple = F), 
+                        selectizeInput("uv_filter_school", "School:", school_choices, multiple = F), 
                         impressum(),
                         width = 2
                     ),
@@ -141,6 +145,7 @@ ui_new <-
                     sidebarPanel(
                         selectizeInput("bv_variable1", "Variable X:", var_choices, selected = "RAT.ability", multiple = F), 
                         selectizeInput("bv_variable2", "Variable y:", var_choices, selected = "MDT.ability", multiple = F), 
+                        selectizeInput("bv_filter_school", "School:", school_choices, multiple = F), 
                         actionButton("switch_axes", 
                                      label = "Switch axes", style = "margin-bottom: 10px"),
                         impressum(),
@@ -209,6 +214,12 @@ check_data <- function(){
   }  
 }
 
+apply_school_filter <- function(data, filter_school){
+  if(is.null(filter_school) || is.na(filter_school) || filter_school == "--")
+    return(data)
+  data %>% filter(school == filter_school)
+}
+
 server <- function(input, output, session) {
   message("*** STARTING APP***")
   #check_data <- reactiveFileReader(1000, session, result_dir[1], reread_data, result_dir[1])
@@ -226,6 +237,7 @@ server <- function(input, output, session) {
     check_data()
     #browser()
     p_id_stats <- master %>% 
+      apply_school_filter(filter_school = input$ov_filter_school) %>% 
       distinct(p_id, DEG.gender, DEG.age, GMS.general, finished) %>% 
       summarise(n_female = sum(DEG.gender == "female", na.rm = T), 
                 n_male = sum(DEG.gender == "male", na.rm = T), 
@@ -266,10 +278,11 @@ server <- function(input, output, session) {
       check_data()
       var_info <- var_data %>% filter(variable == input$uv_variable)
       if(var_info$type == "numeric"){
-        q <- univariate_plot_numeric(master, input$uv_variable, remove_na = T)
+        q <- univariate_plot_numeric(master%>% apply_school_filter(input$uv_school_filter), 
+                                     input$uv_variable, remove_na = T)
         } 
       else if (var_info$type == "categorial"){
-        data <- master 
+        data <- master %>% apply_school_filter(input$uv_school_filter)
         coord_flip <- n_distinct(data[[input$uv_variable]]) > 3
         q <- univariate_plot_categorial(data, input$uv_variable,  remove_na = T, coord_flip = coord_flip)
       }
@@ -285,7 +298,7 @@ server <- function(input, output, session) {
       if(input$bv_variable1 == input$bv_variable2){
         return()
         }
-      bivariate_plot_auto(master, input, var_data, remove_na = T)   
+      bivariate_plot_auto(master %>% apply_school_filter(input$bv_school_filter), input, var_data, remove_na = T)   
       })
    
    #  output$pc_plot <- renderForceNetwork({

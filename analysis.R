@@ -150,7 +150,6 @@ apply_complete_filter <- function(data, complete_filter){
 }  
 
 apply_id_filter <- function(data, id_filter, complete_filter){
-  #browser()
   if(id_filter == "All IDs"){
     return(data)
   }
@@ -187,11 +186,22 @@ read_sessions <- function(session_dir = "../../test_batteries/output/sessions/")
   
 } 
 
+
 setup_workspace <- function(results = "data/from_server", filter_debug = T){
+  school_def <- 
+    readxl::read_excel("data/school_def.xlsx", sheet = "school_info") %>% 
+    select(school = acronym, school_id, country) %>% 
+    mutate(country_code = c("UK" = "00", "DE" = "01")[country], combined = sprintf("%s%s", country_code, school_id))
+  school_map <- school_def$school
+  names(school_map) <- school_def$combined
   master <- read_data(results) 
   if(filter_debug)master <- master %>% filter(!is_debug_id(p_id))
   master <- master %>% join_two_part_data()
   master <- master %>% select(-ends_with("num_items"))
+  if(!("school" %in% names(master))){
+    master <- master %>% mutate(school = school_map[substr(p_id, 1, 4)])
+    master[is.na(master$school),]$school <- substr(master[is.na(master$school),]$p_id, 1, 4)
+  }
   messagef("Filter for debug ids is '%s'", filter_debug)
   assign("master", master, globalenv())
 }
