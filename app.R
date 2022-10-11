@@ -49,8 +49,6 @@ school_choices <- c("--", unique(master$school) %>% na.omit())
 var_types <- c("categorial", "numeric")[1 + map_lgl(var_choices, ~{(master[[.x]] %>% class())[1] == "numeric"})]
 var_data <- tibble(variable = var_choices, type = var_types)
 
-
-
 theme_set(get_default_theme())
 format_result_dir <- function(fname = result_dir){
   fname %>%
@@ -60,6 +58,7 @@ format_result_dir <- function(fname = result_dir){
     str_replace_all("[/]+$", "") %>%  
     paste(collapse = ", ")
 }
+
 get_intro_text <- function(){
   div(h3("Welcome to the LongGold Battery Monitor App"), 
          p("This app allows you visualize and inspect the data from", shiny::tags$br(), 
@@ -215,8 +214,10 @@ check_data <- function(){
 }
 
 apply_school_filter <- function(data, filter_school){
-  if(is.null(filter_school) || is.na(filter_school) || filter_school == "--")
+  if(is.null(filter_school) || is.na(filter_school) || filter_school == "--"){
     return(data)
+  }
+  messagef("Filtering for %s", filter_school)
   data %>% filter(school == filter_school)
 }
 
@@ -230,6 +231,23 @@ server <- function(input, output, session) {
     updateSelectizeInput(session, inputId = "bv_variable2", selected = x)
        
    })
+  shiny::observeEvent(input$ov_filter_school, {
+    updateSelectizeInput(session, inputId = "uv_filter_school", selected = input$ov_filter_school)
+    updateSelectizeInput(session, inputId = "bv_filter_school", selected = input$ov_filter_school)
+    
+  })
+
+  shiny::observeEvent(input$uv_filter_school, {
+    updateSelectizeInput(session, inputId = "ov_filter_school", selected = input$uv_filter_school)
+    updateSelectizeInput(session, inputId = "bv_filter_school", selected = input$uv_filter_school)
+    
+  })
+  shiny::observeEvent(input$bv_filter_school, {
+    updateSelectizeInput(session, inputId = "ov_filter_school", selected = input$bv_filter_school)
+    updateSelectizeInput(session, inputId = "uv_filter_school", selected = input$bv_filter_school)
+    
+  })
+  
   output$introduction <- renderUI({
     get_intro_text()
   })
@@ -278,11 +296,11 @@ server <- function(input, output, session) {
       check_data()
       var_info <- var_data %>% filter(variable == input$uv_variable)
       if(var_info$type == "numeric"){
-        q <- univariate_plot_numeric(master%>% apply_school_filter(input$uv_school_filter), 
+        q <- univariate_plot_numeric(master%>% apply_school_filter(input$uv_filter_school), 
                                      input$uv_variable, remove_na = T)
         } 
       else if (var_info$type == "categorial"){
-        data <- master %>% apply_school_filter(input$uv_school_filter)
+        data <- master %>% apply_school_filter(input$uv_filter_school)
         coord_flip <- n_distinct(data[[input$uv_variable]]) > 3
         q <- univariate_plot_categorial(data, input$uv_variable,  remove_na = T, coord_flip = coord_flip)
       }
@@ -298,7 +316,7 @@ server <- function(input, output, session) {
       if(input$bv_variable1 == input$bv_variable2){
         return()
         }
-      bivariate_plot_auto(master %>% apply_school_filter(input$bv_school_filter), input, var_data, remove_na = T)   
+      bivariate_plot_auto(master %>% apply_school_filter(input$bv_filter_school), input, var_data, remove_na = T)   
       })
    
    #  output$pc_plot <- renderForceNetwork({
@@ -318,7 +336,9 @@ server <- function(input, output, session) {
     check_data()
     vars <- get_parameters(data, input, var_data = var_data)
     if(vars$sub_type == "num-num" && input$bv_variable1 != input$bv_variable2) {
-      get_correlations(master, input$bv_variable1, input$bv_variable2)   
+      get_correlations(master %>% apply_school_filter(input$bv_filter_school), 
+                       input$bv_variable1, 
+                       input$bv_variable2)   
       }
     },  caption = "Correlations", caption.placement = getOption("xtable.caption.placement", "top"))
    
