@@ -1,6 +1,6 @@
 library(tidyverse)
 
-adaptive_tests <- c("JAJ", "EDT", "MPT", "MDT", "BAT", "PIT", "HPT", "MIQ", "RAT", "HPT")
+adaptive_tests <- c("JAJ", "EDT", "MPT", "MDT", "BAT", "BDT", "MSA_results", "PIT", "HPT", "MIQ", "RAT", "HPT")
 dummy <- list()
 
 is_debug_id <- function(p_id){
@@ -33,14 +33,17 @@ make_quest_dummy <- function(test_id){
 }
 
 filter_for_test <- function(results, test_id){
-  map(results %>% as.list(), function(x){
-    #browser()
+  map_dfr(results %>% as.list(), function(x){
     data <- x$data$value[[test_id]]
     if(is.null(data)){
-      return(NULL)
+      data <- x[[test_id]]
+      if(is.null(data)){
+        return(NULL)
+      }
     }
-    tibble(p_id = x$participant_id, data = as.data.frame(data))    
-  }) %>% discard(is.null)
+    #browser()
+    tibble(p_id = x$session$p_id) %>% bind_cols(as.data.frame(data))    
+  }) 
 }
 
 dummy <- append(map(adaptive_tests, make_adaptive_test_dummy), map(psyquest::get_tests(), make_quest_dummy))
@@ -106,6 +109,7 @@ parse_generic_entry <- function(q_entry, label, raw_data = FALSE){
   }
   sum_data <- names[!stringr::str_detect(names, "q[0-9]+")]
   sum_data <- sum_data[!stringr::str_detect(sum_data, "i[0-9]+")]
+  sum_data <- sum_data[!stringr::str_detect(sum_data, "sequence_order")]
   ret <- q_entry[sum_data]
   names(ret) <- sprintf("%s.%s", label, names(ret) %>% stringr::str_to_lower() %>% stringr::str_replace_all(" ", "_"))
   ret <- post_process(ret, label)

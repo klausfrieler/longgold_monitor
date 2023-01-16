@@ -188,13 +188,15 @@ read_sessions <- function(session_dir = "../../test_batteries/output/sessions/")
 
 
 setup_workspace <- function(results = "data/from_server", filter_debug = T){
+  print("setup workspace called")
   school_def <- 
     readxl::read_excel("data/school_def.xlsx", sheet = "school_info") %>% 
     select(school = acronym, school_id, country) %>% 
-    mutate(country_code = c("UK" = "00", "DE" = "01")[country], combined = sprintf("%s%s", country_code, school_id))
+    mutate(country_code = c("UK" = "00", "DE" = "01", "IT" = "02")[country], combined = sprintf("%s%s", country_code, school_id))
   school_map <- school_def$school
   names(school_map) <- school_def$combined
-  master <- read_data(results) 
+  master <- read_data(results)
+  master <- master %>% set_names(str_replace(names(master), "MSA_results", "MSA"))
   if(filter_debug)master <- master %>% filter(!is_debug_id(p_id))
   master <- master %>% join_two_part_data()
   master <- master %>% select(-ends_with("num_items"))

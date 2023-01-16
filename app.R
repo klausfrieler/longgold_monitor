@@ -24,11 +24,11 @@ if(on_server){
   result_dir  <- readRDS("result_dir.rds")
   session_dir <- str_replace(result_dir, "results", "sessions")
 } else{
-  result_dir <- "data/from_server"
+  #result_dir <- "data/from_server"
   filter_debug <- T
   #result_dir <- sprintf("data/it_wave/from_server/part%d", 1:2)
   session_dir <- "../../test_batteries/output/sessions/"
-  #result_dir <- "data/it_wave/from_server"
+  result_dir <- "data/de_wave_8_2022"
 }
 
 setup_workspace(result_dir, filter_debug)
@@ -108,7 +108,7 @@ ui_new <-
                         selectizeInput("ov_filter_school", "School:", school_choices, multiple = F), 
                         downloadButton("download_all_data_csv", "Download Data"),
                         checkboxInput("dec", label = "Use German Format", value = 0),
-                        downloadButton("download_HPT", "Download HPT Data"),
+                        #downloadButton("download_HPT", "Download HPT Data"),
                         width = 2
                     ),
                     
@@ -223,7 +223,7 @@ apply_school_filter <- function(data, filter_school){
 
 server <- function(input, output, session) {
   message("*** STARTING APP***")
-  #check_data <- reactiveFileReader(1000, session, result_dir[1], reread_data, result_dir[1])
+  check_data <- reactiveFileReader(5000, session, result_dir[1], reread_data)
   shiny::observeEvent(input$switch_axes, {
     x <- input$bv_variable1
     y <- input$bv_variable2
@@ -251,9 +251,9 @@ server <- function(input, output, session) {
   output$introduction <- renderUI({
     get_intro_text()
   })
+  
   output$overall_stats <- renderTable({
     check_data()
-    #browser()
     p_id_stats <- master %>% 
       apply_school_filter(filter_school = input$ov_filter_school) %>% 
       distinct(p_id, DEG.gender, DEG.age, GMS.general, finished) %>% 
