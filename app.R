@@ -28,7 +28,8 @@ if(on_server){
   filter_debug <- T
   #result_dir <- sprintf("data/it_wave/from_server/part%d", 1:2)
   session_dir <- "../../test_batteries/output/sessions/"
-  result_dir <- "data/de_wave_8_2022"
+  #result_dir <- "data/de_wave_8_2022"
+  result_dir <- "data/workshop"
 }
 
 setup_workspace(result_dir, filter_debug)
