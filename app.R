@@ -25,7 +25,7 @@ if(on_server){
   session_dir <- str_replace(result_dir, "results", "sessions")
 } else{
   #result_dir <- "data/from_server"
-  filter_debug <- T
+  filter_debug <- F
   #result_dir <- sprintf("data/it_wave/from_server/part%d", 1:2)
   session_dir <- "../../test_batteries/output/sessions/"
   #result_dir <- "data/de_wave_8_2022"

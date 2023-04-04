@@ -185,7 +185,6 @@ read_sessions <- function(session_dir = "../../test_batteries/output/sessions/")
 } 
 
 fix_bad_tpt_data <- function(data){
-  browser()
   data <- data %>% 
     select(
       -contains("abs_env"), 
@@ -219,6 +218,15 @@ fix_bad_tpt_data <- function(data){
   data  
 }
 
+set_school_from_p_id <- function(data, school_defs){
+  if(!("p_id") %in% names(data)){
+    return(data)
+  }
+  school <- substr(p_id, 3, 4)  
+  country <- substr(p_id, 1, 2)   
+  valid <- nchar(str_extract(country, "[0-9]+")) != 2 
+}
+
 setup_workspace <- function(results = "data/from_server", filter_debug = T){
   print("setup workspace called")
   school_def <- 
@@ -234,13 +242,13 @@ setup_workspace <- function(results = "data/from_server", filter_debug = T){
   if(filter_debug)master <- master %>% filter(!is_debug_id(p_id))
   master <- master %>% join_two_part_data()
   master <- master %>% select(-ends_with("num_items"))
-  browser()
+  
   if(any(str_detect(names(master), "raw_flux"))) {
     master <- fix_bad_tpt_data(master)
   }
   if(!("school" %in% names(master))){
     master <- master %>% mutate(school = school_map[substr(p_id, 1, 4)])
-    master[is.na(master$school),]$school <- substr(master[is.na(master$school),]$p_id, 1, 4)
+    #master[is.na(master$school),]$school <- substr(master[is.na(master$school),]$p_id, 1, 4)
   }
   messagef("Filter for debug ids is '%s'", filter_debug)
   assign("master", master, globalenv())
