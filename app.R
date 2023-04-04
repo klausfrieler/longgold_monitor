@@ -29,7 +29,7 @@ if(on_server){
   #result_dir <- sprintf("data/it_wave/from_server/part%d", 1:2)
   session_dir <- "../../test_batteries/output/sessions/"
   #result_dir <- "data/de_wave_8_2022"
-  result_dir <- "data/workshop"
+  result_dir <- "data/bhs_music"
 }
 
 setup_workspace(result_dir, filter_debug)
@@ -51,6 +51,7 @@ var_types <- c("categorial", "numeric")[1 + map_lgl(var_choices, ~{(master[[.x]]
 var_data <- tibble(variable = var_choices, type = var_types)
 
 theme_set(get_default_theme())
+
 format_result_dir <- function(fname = result_dir){
   fname %>%
     str_replace_all("output/results", "") %>% 
@@ -80,12 +81,12 @@ impressum <- function(){
                  target = "_blank"),
         shiny::tags$br(),
         shiny::tags$br(), 
-        "Powered by",
-        shiny::tags$br(),
-        shiny::a(href = "http://www.music-psychology.de/",
-                 "Deutsche Gesellschaft für Musikspsychologie", target = "_blank"),
-        shiny::tags$br(), 
-        shiny::tags$br(),
+        # "Powered by",
+        # shiny::tags$br(),
+        # shiny::a(href = "http://www.music-psychology.de/",
+        #          "Deutsche Gesellschaft für Musikspsychologie", target = "_blank"),
+        # shiny::tags$br(), 
+        # shiny::tags$br(),
         shiny::a(href = "https://github.com/klausfrieler/longgold_monitor", "On Github", target = "_blank"), 
         style = "font-size: 10pt; display: block"
     )
@@ -199,7 +200,6 @@ ui_new <-
             
             ))
 
-# Define server logic required to draw a plot
 reread_data <- function(x){
   setup_workspace(result_dir, filter_debug)
 }
@@ -369,20 +369,20 @@ server <- function(input, output, session) {
     shiny::div(shiny::h4("Causal Network Model Regression"), shiny::HTML(lm_tab$knitr))
    })
   output$download_all_data_csv <- downloadHandler(
-    filename = "de_wave_7_2021_data.csv",
+    filename = sprintf("%s.csv", format_result_dir(result_dir)),
     content = function(file) {
       dec <- ifelse(input$dec, ",", ".") 
       write.table(master, file, row.names = FALSE, dec = dec, sep = ";", quote = T)
     }
   )
-  output$download_HPT <- downloadHandler(
-    filename = "de_wave_7_2021_HPT_data.rds",
-    content = function(file) {
-      raw_data <- read_adaptive_raw_data(result_dir, "HPT")
-      messagef("Read %d rows of HPT data", nrow(raw_data))
-      saveRDS(file = file, object = raw_data)
-    }
-  )
+  # output$download_HPT <- downloadHandler(
+  #   filename = "de_wave_7_2021_HPT_data.rds",
+  #   content = function(file) {
+  #     raw_data <- read_adaptive_raw_data(result_dir, "HPT")
+  #     messagef("Read %d rows of HPT data", nrow(raw_data))
+  #     saveRDS(file = file, object = raw_data)
+  #   }
+  # )
   
 }
 

@@ -9,7 +9,6 @@ cat_predictors <- c("gender")
 
 
 get_parameters <- function(data, input, keep_pseudo_na = T, var_data){
-  
   vars <- c("x" = input$bv_variable1, "y" = input$bv_variable2)
   var_info1 <- var_data %>% filter(variable == input$bv_variable1)
   var_info2 <- var_data %>% filter(variable == input$bv_variable2)
@@ -48,6 +47,7 @@ join_two_part_data_rows <- function(rows){
   if(nrow(rows) < 2){
     return(rows)
   }
+  
   if(nrow(rows) > 2){
     return(rows %>% join_restart_rows() %>% join_two_part_data())
   }
@@ -85,7 +85,6 @@ join_restart_rows <- function(data){
   if(is.null(data[["p_id"]])){
     return(data)
   }
-  #browser()
   ids <- data %>% count(p_id) %>% filter(n > 1) %>% pull(p_id)
   ret <- data %>% filter(!(p_id %in% ids))
   fixed_rows <- 
@@ -120,7 +119,6 @@ read_data <- function(result_dir = "data/from_server"){
   messagef("Setting up data from [%s]", paste(result_dir, collapse = ", "))
   
   results <- purrr::map(list.files(result_dir, pattern = "*.rds", full.names = T), ~{readRDS(.x) %>% as.list()})
-  #browser()
   purrr::map_dfr(results, function(x){
     parse_single_participant_results(x)
   })
@@ -186,6 +184,40 @@ read_sessions <- function(session_dir = "../../test_batteries/output/sessions/")
   
 } 
 
+fix_bad_tpt_data <- function(data){
+  browser()
+  data <- data %>% 
+    select(
+      -contains("abs_env"), 
+      -contains("raw_env"), 
+      -contains("env_order"), 
+      -contains("bin_env"), 
+      -contains("abs_flux"), 
+      -contains("raw_flux"), 
+      -contains("bin_flux"), 
+      -contains("flux_order"), 
+      -contains("abs_cent"), 
+      -contains("raw_cent"), 
+      -contains("bin_cent"), 
+      -contains("cent_order"), 
+    ) 
+  TPT.env_score <- rowSums(data %>% select(contains("env_score")), na.rm = T)
+  TPT.flux_score <- rowSums(data %>% select(contains("flux_score")), na.rm = T)
+  TPT.cent_score <- rowSums(data %>% select(contains("cent_score")), na.rm = T)
+  TPT.general_score <- rowSums(data %>% select(contains("general_score")), na.rm = T)
+
+  data <- data %>% 
+    select(-contains("env_score")) %>% 
+    select(-contains("cent_score")) %>% 
+    select(-contains("flux_score")) %>% 
+    select(-contains("general_score"))
+    
+  data$TPT.env_score <- TPT.env_score
+  data$TPT.flux_score <- TPT.flux_score
+  data$TPT.cent_score <- TPT.cent_score
+  data$TPT.general_score <- TPT.general_score
+  data  
+}
 
 setup_workspace <- function(results = "data/from_server", filter_debug = T){
   print("setup workspace called")
@@ -195,11 +227,17 @@ setup_workspace <- function(results = "data/from_server", filter_debug = T){
     mutate(country_code = c("UK" = "00", "DE" = "01", "IT" = "02")[country], combined = sprintf("%s%s", country_code, school_id))
   school_map <- school_def$school
   names(school_map) <- school_def$combined
+  
   master <- read_data(results)
   master <- master %>% set_names(str_replace(names(master), "MSA_results", "MSA"))
+  
   if(filter_debug)master <- master %>% filter(!is_debug_id(p_id))
   master <- master %>% join_two_part_data()
   master <- master %>% select(-ends_with("num_items"))
+  browser()
+  if(any(str_detect(names(master), "raw_flux"))) {
+    master <- fix_bad_tpt_data(master)
+  }
   if(!("school" %in% names(master))){
     master <- master %>% mutate(school = school_map[substr(p_id, 1, 4)])
     master[is.na(master$school),]$school <- substr(master[is.na(master$school),]$p_id, 1, 4)

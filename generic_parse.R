@@ -1,6 +1,6 @@
 library(tidyverse)
 
-adaptive_tests <- c("JAJ", "EDT", "MPT", "MDT", "BAT", "BDT", "MSA_results", "PIT", "HPT", "MIQ", "RAT", "HPT")
+adaptive_tests <- c("JAJ", "EDT", "MPT", "MDT", "BAT", "BDT", "MSA_results", "PIT", "PIAT", "HPT", "MIQ", "RAT", "HPT", "TPT")
 dummy <- list()
 
 is_debug_id <- function(p_id){
