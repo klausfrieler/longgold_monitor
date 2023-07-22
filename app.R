@@ -25,11 +25,11 @@ if(on_server){
   session_dir <- str_replace(result_dir, "results", "sessions")
 } else{
   #result_dir <- "data/from_server"
-  filter_debug <- F
+  filter_debug <- T
   #result_dir <- sprintf("data/it_wave/from_server/part%d", 1:2)
   session_dir <- "../../test_batteries/output/sessions/"
-  #result_dir <- "data/de_wave_8_2022"
-  result_dir <- "data/bhs_music"
+  result_dir <- "data/lv_wave_1_2023"
+  #result_dir <- "data/bhs_music"
 }
 
 setup_workspace(result_dir, filter_debug)
@@ -42,8 +42,8 @@ var_choices <- setdiff(names(master), c("p_id",
                                        "num_restarts", 
                                        "DEG.first_language",
                                        "DEG.second_language",
-                                       "DEG.gender", 
-                                       "DEG.age", 
+                                       # "DEG.gender", 
+                                       # "DEG.age", 
                                        "RAT.num_items"))
 school_choices <- c("--", unique(master$school) %>% na.omit())
 
@@ -262,7 +262,7 @@ server <- function(input, output, session) {
                 n_male = sum(DEG.gender == "male", na.rm = T), 
                 n_other = sum(DEG.gender == "other", na.rm = T), 
                 n_not_say = sum(DEG.gender == "not_say", na.rm = T), 
-                mean_age = mean(DEG.age, na.rm = T), 
+                mean_age = mean(DEG.age/12, na.rm = T), 
                 mean_GMS = mean(GMS.general, na.rm = T), 
                 n_unique = n(),
                 n_complete = sum(finished, na.rm = T),
